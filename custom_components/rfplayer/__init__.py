@@ -24,7 +24,6 @@ from homeassistant.const import (
 )
 from homeassistant.core import CoreState, callback
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.device_registry import async_get_registry
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -225,7 +224,7 @@ async def async_setup_entry(hass, entry):
 
         #await super().async_will_remove_from_hass()
         """
-        device_registry = await async_get_registry(hass)
+        device_registry = dr.async_get(hass)
         device = device_registry.async_get_device(
             (DOMAIN, hass.data[DOMAIN]
              [CONF_DEVICE] + "_" + self._attr_unique_id)
@@ -637,7 +636,7 @@ class RfplayerDevice(RestoreEntity):
     async def async_will_remove_from_hass(self):
         """Clean when entity removed."""
         await super().async_will_remove_from_hass()
-        device_registry = await async_get_registry(self.hass)
+        device_registry = dr.async_get(hass)
         device = device_registry.async_get_device(
             (DOMAIN, self.hass.data[DOMAIN]
              [CONF_DEVICE] + "_" + self._attr_unique_id)
