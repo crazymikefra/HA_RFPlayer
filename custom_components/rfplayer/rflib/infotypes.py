@@ -72,6 +72,9 @@ def infoType_1_decode(infos:list,allowEmptyID:bool=False) -> list:
     fields_found["id"]=infos["id"]
     fields_found["command"]=fields_found["subType"]
 
+    if fields_found["command"] == "ALL_ON" or fields_found["command"] == "ALL_OFF":
+        fields_found["id"]=infos["id"]+"G"
+
     if fields_found["id"]!="0" or allowEmptyID:
         return fields_found
 
