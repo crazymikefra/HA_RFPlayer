@@ -32,6 +32,7 @@ except:# fallback (pre 2022.5)
 
 from homeassistant.helpers import config_validation as cv, entity_platform, service
 from homeassistant.helpers.entity_component import EntityComponent
+from homeassistant.helpers.dispatcher import (async_dispatcher_connect)
 import voluptuous as vol
 
 
@@ -63,7 +64,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     """Set up the Rfplayer platform."""
     config = entry.data
     options = entry.options
-    #_LOGGER.debug("config : %s",str(config))
+    #_LOGGER.debug("Cover - async_setup_entry - config : %s",str(config))
     #_LOGGER.debug("options : %s",str(options))
 
     platform = entity_platform.current_platform.get()
@@ -100,7 +101,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
                     protocol=device_info[CONF_PROTOCOL],
                     device_address=device_info.get(CONF_DEVICE_ADDRESS),
                     device_id=device_info.get(CONF_DEVICE_ID),
-                    initial_event=device_info,
+                    #initial_event=device_info,
+                    initial_event=None,
                     #device_class=DEVICE_CLASS_SHUTTER
                 )
             else:
@@ -145,6 +147,22 @@ class RfplayerCover(RfplayerDevice, CoverEntity):
         """Restore RFPlayer device state (ON/OFF)."""
         await super().async_added_to_hass()
 
+        _LOGGER.debug("async_added_to_hass : _event=%s",self._event)
+        if self._event is None:
+            old_state = await self.async_get_last_state()
+            _LOGGER.debug("async_added_to_hass : old_state=%s",old_state)
+            if old_state is not None:
+                self._state = old_state.state
+                self.schedule_update_ha_state()
+            else:
+                if self._initial_event:
+                    self.hass.data[DOMAIN][DATA_ENTITY_LOOKUP][EVENT_KEY_COVER][
+                        self._initial_event[EVENT_KEY_ID]
+                    ] = self.entity_id
+
+        
+
+        """
         self.hass.data[DOMAIN][DATA_ENTITY_LOOKUP][EVENT_KEY_COVER][
             self._initial_event[EVENT_KEY_ID]
         ] = self.entity_id
@@ -153,6 +171,9 @@ class RfplayerCover(RfplayerDevice, CoverEntity):
             old_state = await self.async_get_last_state()
             if old_state is not None:
                 self._state = old_state.state
+        """
+
+        
 
     async def async_will_remove_from_hass(self):
         await super().async_will_remove_from_hass()
@@ -170,6 +191,7 @@ class RfplayerCover(RfplayerDevice, CoverEntity):
             self._attr_state = STATE_CLOSED
         elif command in [COMMAND_MY]:
             self._attr_state = STATE_OPEN
+        _LOGGER.debug("Event State : %s", str(self._attr_state))
         self.schedule_update_ha_state()
 
     @property

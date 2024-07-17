@@ -106,7 +106,8 @@ def infoType_3_decode(infos:list,allowEmptyID:bool=False) -> list:
     if infotypes_debug: log.debug("Decode InfoType 3")
     fields_found = {}
     fields_found["subType"]=infos["subTypeMeaning"]
-    if fields_found["subType"] == None or fields_found["subType"] == "" : fields_found["subType"]=infos.get("subType")
+    if fields_found["subType"] == None or fields_found["subType"] == "" : 
+        fields_found["subType"]=infos.get("subType")
     match int(infos["qualifier"]):
         case 1 :
             fields_found["qualifier"]="OFF"

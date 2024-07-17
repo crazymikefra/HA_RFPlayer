@@ -24,7 +24,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import CoreState, callback
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.device_registry import async_get_registry
+#from homeassistant.helpers.device_registry import async_get_registry
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -278,7 +278,7 @@ async def async_setup_entry(hass, entry):
         accordingly.
         """
         event_type = identify_event_type(event)
-        #_LOGGER.debug("event of type %s: %s", event_type, event)
+        _LOGGER.debug("event of type %s: %s", event_type, event)
 
         # Don't propagate non entity events (eg: version string, ack response)
         if event_type not in hass.data[DOMAIN][DATA_ENTITY_LOOKUP]:
@@ -290,8 +290,8 @@ async def async_setup_entry(hass, entry):
         #_LOGGER.debug("List of entities : %s",str(hass.data[DOMAIN]))
         entity_id = hass.data[DOMAIN][DATA_ENTITY_LOOKUP][event_type][event_id]
 
-        #_LOGGER.debug("Entity ID : %s",entity_id);
-        #_LOGGER.debug("Event ID : %s",event_id);
+        _LOGGER.debug("Entity ID : %s",entity_id);
+        _LOGGER.debug("Event ID : %s",event_id);
 
         if entity_id:
             # Propagate event to every entity matching the device id
@@ -637,6 +637,7 @@ class RfplayerDevice(RestoreEntity):
     async def async_will_remove_from_hass(self):
         """Clean when entity removed."""
         await super().async_will_remove_from_hass()
+        """
         device_registry = await async_get_registry(self.hass)
         device = device_registry.async_get_device(
             (DOMAIN, self.hass.data[DOMAIN]
@@ -644,5 +645,5 @@ class RfplayerDevice(RestoreEntity):
         )
         if device:
             device_registry.async_remove_device(device)
-
+        """
 

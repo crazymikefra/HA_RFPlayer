@@ -4,6 +4,7 @@ import logging
 from homeassistant.const import (
     CONF_DEVICES,CONF_DEVICES)
 from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.dispatcher import (async_dispatcher_connect)
 
 from . import DATA_DEVICE_REGISTER, EVENT_KEY_SENSOR, RfplayerDevice
 from .const import (
@@ -107,10 +108,24 @@ class RfplayerSensor(RfplayerDevice):
         # Register id and aliases
         await super().async_added_to_hass()
 
-        if self._initial_event:
-            self.hass.data[DOMAIN][DATA_ENTITY_LOOKUP][EVENT_KEY_SENSOR][
-                self._initial_event[EVENT_KEY_ID]
-            ] = self.entity_id
+        _LOGGER.debug("async_added_to_hass : _event=%s",self._event)
+
+        if self._event is None:
+            old_state = await self.async_get_last_state()
+            _LOGGER.debug("async_added_to_hass : old_state=%s",old_state)
+            if old_state is not None:
+                self._state = old_state.state
+                self.schedule_update_ha_state()
+                """
+                async_dispatcher_connect(
+                    self._hass, DATA_UPDATED, self._schedule_immediate_update
+                )
+                """
+            else:
+                if self._initial_event:
+                    self.hass.data[DOMAIN][DATA_ENTITY_LOOKUP][EVENT_KEY_SENSOR][
+                        self._initial_event[EVENT_KEY_ID]
+                    ] = self.entity_id
 
     async def async_will_remove_from_hass(self):
         #await super().async_will_remove_from_hass()

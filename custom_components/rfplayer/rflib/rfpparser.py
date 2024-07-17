@@ -5,7 +5,7 @@ import json
 import logging
 import re
 from typing import Any, Callable, Dict, Generator, cast
-from .protocols import *
+# from .protocols import *
 import traceback
 
 log = logging.getLogger(__name__)
@@ -270,7 +270,7 @@ def packet_events(packet: PacketType) -> Generator[PacketType, None, None]:
         #log.debug("packet_events, sensor:%s,value:%s", sensor, value)
         unit = packet.get(sensor + "_unit", None)
         
-        if forceid==None:
+        if forceid is not None:
             id=packet_id + field_abbrev[sensor] + PACKET_ID_SEP + field_abbrev[sensor]
         else :
             id=forceid
@@ -286,10 +286,11 @@ def packet_events(packet: PacketType) -> Generator[PacketType, None, None]:
 
     if(packet.get('elements')):
         for sensor, value in packet.get('elements').items():
-            log.debug("packet_events, sensor:%s,value:%s", sensor, value)
+            if(value.get("protocol","unknown")!="SYSSTATUS"):
+                log.debug("packet_events, sensor:%s,value:%s", sensor, value)
             unit = packet.get("sensor" + "_unit", None)
             
-            if forceid==None:
+            if forceid is None:
                 id=packet_id + value.get("protocol","unknown") + PACKET_ID_SEP + sensor
             else :
                 id=forceid
