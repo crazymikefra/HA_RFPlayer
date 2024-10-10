@@ -140,12 +140,15 @@ def decode_packet(packet: str) -> list:
 
     data = cast(PacketType, {"node": PacketHeader.gateway.name})
 
-    #log.debug("Packet : %s",packet)
+    packet = packet.encode("ascii", "ignore")
+    packet = packet.decode('UTF-8')
+    # log.error("Packet : %s",packet)
     match packet[:5]:
         case "ZIA--":
             # Welcome messages and status directly send
             #TODO : Manage ZIA-- frames
-            frame=packet.replace("ZIA--", "")
+            frame=str(packet).replace("ZIA--", "")
+            # log.error("frame :%s",frame)
             if frame.startswith('Welcome'):
                 protocol="WELCOME"
                 message=frame
@@ -169,9 +172,9 @@ def decode_packet(packet: str) -> list:
         
         case "ZIA33":
             # Protocols
-            message = json.loads(packet.replace("ZIA33", ""))["frame"]
+            message = json.loads(str(packet).replace("ZIA33", ""))["frame"]
             data["protocol"] = message["header"]["protocolMeaning"]
-            #log.debug("Packet : %s",packet)
+            # log.error("Message : %s",message)
 
             try:
                 packets_found.append(globals()["_".join([data["protocol"],"decode"])](data,message,PacketHeader.gateway.name))
@@ -270,7 +273,7 @@ def packet_events(packet: PacketType) -> Generator[PacketType, None, None]:
         #log.debug("packet_events, sensor:%s,value:%s", sensor, value)
         unit = packet.get(sensor + "_unit", None)
         
-        if forceid is not None:
+        if forceid==None:
             id=packet_id + field_abbrev[sensor] + PACKET_ID_SEP + field_abbrev[sensor]
         else :
             id=forceid
@@ -290,7 +293,7 @@ def packet_events(packet: PacketType) -> Generator[PacketType, None, None]:
                 log.debug("packet_events, sensor:%s,value:%s", sensor, value)
             unit = packet.get("sensor" + "_unit", None)
             
-            if forceid is None:
+            if forceid==None:
                 id=packet_id + value.get("protocol","unknown") + PACKET_ID_SEP + sensor
             else :
                 id=forceid
